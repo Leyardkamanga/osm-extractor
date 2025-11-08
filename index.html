@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSM Data Extractor</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    
+    <div id="map"></div>
+    
+    <div class="map-controls">
+        
+        <div class="control-button" id="search-control" title="Search Location">
+            <i class="fas fa-search"></i>
+        </div>
+        
+        <div class="control-button" id="layers-control" title="Select Features">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        
+        <div class="control-button" id="format-control" title="Export Format">
+            <i class="fas fa-file-export"></i>
+        </div>
+        
+        <div class="control-button" id="upload-control" title="Upload Boundary File">
+            <i class="fas fa-upload"></i>
+        </div>
+        
+        <div class="control-button download-button" id="download-control" title="Download Data">
+            <i class="fas fa-download"></i>
+        </div>
+        
+        <div class="control-button clear-button" id="clear-control" title="Clear Selection">
+            <i class="fas fa-trash"></i>
+        </div>
+    </div>
+    
+    <div id="search-panel" class="side-panel">
+        <div class="panel-header">
+            <h3>Search Location</h3>
+            <button class="close-panel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <input type="text" id="location-search" placeholder="Enter location name..." class="search-input">
+            <div id="search-results" class="results-list"></div>
+        </div>
+    </div>
+    
+    <div id="layers-panel" class="side-panel">
+        <div class="panel-header">
+            <h3>Select Features</h3>
+            <button class="close-panel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="roads" checked>
+                <span>Roads & Highways</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="buildings" checked>
+                <span>Buildings</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="water" checked>
+                <span>Water Bodies</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="landuse" checked>
+                <span>Land Use</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="amenities" checked>
+                <span>Amenities</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="featureType" value="natural" checked>
+                <span>Natural Features</span>
+            </label>
+            <hr>
+            <label class="check-item">
+                <input type="checkbox" name="osmType" value="node" checked>
+                <span>Nodes (Points)</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="osmType" value="way" checked>
+                <span>Ways (Lines/Polygons)</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="osmType" value="relation" checked>
+                <span>Relations</span>
+            </label>
+            <label class="check-item special">
+                <input type="checkbox" id="all" value="all">
+                <span>All Data</span>
+            </label>
+        </div>
+    </div>
+    
+    <div id="format-panel" class="side-panel">
+        <div class="panel-header">
+            <h3>Export Format</h3>
+            <button class="close-panel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <label class="radio-item">
+                <input type="radio" name="format" value="geojson" checked>
+                <span>GeoJSON</span>
+            </label>
+            <label class="radio-item">
+                <input type="radio" name="format" value="shapefile">
+                <span>Shapefile (ZIP)</span>
+            </label>
+            <label class="radio-item">
+                <input type="radio" name="format" value="osm">
+                <span>OSM XML</span>
+            </label>
+            <label class="radio-item">
+                <input type="radio" name="format" value="kml">
+                <span>KML</span>
+            </label>
+            <label class="radio-item">
+                <input type="radio" name="format" value="gpx">
+                <span>GPX</span>
+            </label>
+        </div>
+    </div>
+    
+    <div id="upload-panel" class="side-panel">
+        <div class="panel-header">
+            <h3>Upload Boundary</h3>
+            <button class="close-panel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <p>Upload a file (GeoJSON, KML, GPX) to define the extraction area.</p>
+            <input type="file" id="boundary-upload" accept=".geojson,.kml,.gpx,.json">
+        </div>
+    </div>
+    
+    <div id="instruction-box" class="instruction-box">
+        <i class="fas fa-info-circle"></i> Click and drag on the map to select an area or upload a boundary file
+    </div>
+    
+    <div id="status"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tokml@0.4.0/tokml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/togpx@0.5.5/togpx.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@4.0.0/dist/togeojson.umd.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

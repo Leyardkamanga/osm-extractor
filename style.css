@@ -1,0 +1,314 @@
+/* Base Reset and Layout */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Map Controls (Top Right) */
+.map-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.control-button {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s, box-shadow 0.2s;
+    font-size: 18px;
+    color: #333;
+}
+
+.control-button:hover {
+    background-color: #f4f4f4;
+}
+
+.control-button.download-button {
+    background: #4caf50;
+    color: white;
+    border-color: #388e3c;
+}
+
+.control-button.download-button:hover {
+    background: #388e3c;
+}
+
+.control-button.clear-button {
+    background: #f44336;
+    color: white;
+    border-color: #d32f2f;
+}
+
+.control-button.clear-button:hover {
+    background: #d32f2f;
+}
+
+/* Side Panels (Right) */
+.side-panel {
+    position: absolute;
+    top: 10px;
+    right: 60px; /* Position next to controls */
+    width: 300px;
+    max-height: 90%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    transform: translateX(120%);
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.side-panel.active {
+    transform: translateX(0);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    background-color: #f7f7f7;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.close-panel {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #777;
+    padding: 5px;
+}
+
+.close-panel:hover {
+    color: #333;
+}
+
+.panel-content {
+    padding: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Search Panel Styles */
+.search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.result-item {
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #fff;
+    transition: background-color 0.1s;
+}
+
+.result-item:hover {
+    background-color: #f0f8ff;
+    border-color: #b0e0e6;
+}
+
+.result-name {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.result-type {
+    font-size: 12px;
+    color: #777;
+}
+
+/* Layers and Format Panel Styles (Checkboxes/Radios) */
+.check-item, .radio-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.check-item input, .radio-item input {
+    margin-right: 10px;
+    accent-color: #007bff;
+}
+
+.check-item span, .radio-item span {
+    flex-grow: 1;
+}
+
+.check-item hr {
+    margin: 10px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+/* NEW: Upload Panel Styles */
+#upload-panel .panel-content p {
+    margin-bottom: 15px;
+    color: #444;
+    font-size: 14px;
+}
+
+#boundary-upload {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Custom styling to hide default file input button and use a styled ::before pseudo-element */
+#boundary-upload::-webkit-file-upload-button {
+    visibility: hidden;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+#boundary-upload::before {
+    content: 'Select File';
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+    border-radius: 3px;
+    padding: 6px 12px;
+    outline: none;
+    white-space: nowrap;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 10pt;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+#boundary-upload:hover::before {
+    background: #0056b3;
+}
+
+/* Instruction Box (Bottom Left) */
+#instruction-box {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#instruction-box i {
+    color: #2196f3;
+}
+
+/* Status Messages (Bottom Center) */
+#status {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    min-width: 200px;
+    text-align: center;
+}
+
+#status.success, #status.error, #status.info, #status.warning {
+    display: block;
+    opacity: 1;
+}
+
+#status.success {
+    background: #4caf50;
+    color: white;
+}
+
+#status.error {
+    background: #f44336;
+    color: white;
+}
+
+#status.info {
+    background: #2196f3;
+    color: white;
+}
+
+#status.warning {
+    background: #ff9800;
+    color: white;
+}
+
+/* Leaflet Overrides (Optional but good practice) */
+.leaflet-container {
+    background: #fff;
+}
