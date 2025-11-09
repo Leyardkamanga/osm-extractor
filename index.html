@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self' https://nominatim.openstreetmap.org https://overpass-api.de; font-src 'self' https://cdnjs.cloudflare.com;">
     <title>OSM Data Extractor</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
@@ -13,13 +14,29 @@
     
     <div id="map"></div>
     
+    <!-- Map Controls (Top Right) -->
+    <div class="top-bar">
+        <div class="app-title">
+            <i class="fas fa-map-marked-alt"></i>
+            OSM Data Extractor
+        </div>
+        <div class="top-controls">
+            <button class="icon-button" id="theme-toggle" title="Toggle Dark Mode">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="icon-button" id="help-button" title="Keyboard Shortcuts">
+                <i class="fas fa-keyboard"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Map Controls (Right Side) -->
     <div class="map-controls">
-        
-        <div class="control-button" id="search-control" title="Search Location">
+        <div class="control-button" id="search-control" title="Search Location (Ctrl+F)">
             <i class="fas fa-search"></i>
         </div>
         
-        <div class="control-button" id="layers-control" title="Select Features">
+        <div class="control-button" id="layers-control" title="Select Features (Ctrl+L)">
             <i class="fas fa-layer-group"></i>
         </div>
         
@@ -27,19 +44,34 @@
             <i class="fas fa-file-export"></i>
         </div>
         
-        <div class="control-button" id="upload-control" title="Upload Boundary File">
+        <div class="control-button" id="upload-control" title="Upload Boundary File (Ctrl+U)">
             <i class="fas fa-upload"></i>
         </div>
         
-        <div class="control-button download-button" id="download-control" title="Download Data">
+        <div class="control-button" id="preview-control" title="Preview Features">
+            <i class="fas fa-eye"></i>
+        </div>
+        
+        <div class="control-button download-button" id="download-control" title="Download Data (Ctrl+D)">
             <i class="fas fa-download"></i>
         </div>
         
-        <div class="control-button clear-button" id="clear-control" title="Clear Selection">
+        <div class="control-button" id="history-control" title="Download History">
+            <i class="fas fa-history"></i>
+        </div>
+        
+        <div class="control-button clear-button" id="clear-control" title="Clear Selection (C)">
             <i class="fas fa-trash"></i>
         </div>
     </div>
     
+    <!-- Live Area Display -->
+    <div id="area-display" class="area-display">
+        <i class="fas fa-ruler-combined"></i>
+        <span id="area-text">No area selected</span>
+    </div>
+    
+    <!-- Search Panel -->
     <div id="search-panel" class="side-panel">
         <div class="panel-header">
             <h3>Search Location</h3>
@@ -51,12 +83,14 @@
         </div>
     </div>
     
+    <!-- Layers Panel -->
     <div id="layers-panel" class="side-panel">
         <div class="panel-header">
             <h3>Select Features</h3>
             <button class="close-panel"><i class="fas fa-times"></i></button>
         </div>
         <div class="panel-content">
+            <div class="section-title">Feature Types</div>
             <label class="check-item">
                 <input type="checkbox" name="featureType" value="roads" checked>
                 <span>Roads & Highways</span>
@@ -82,6 +116,7 @@
                 <span>Natural Features</span>
             </label>
             <hr>
+            <div class="section-title">OSM Types</div>
             <label class="check-item">
                 <input type="checkbox" name="osmType" value="node" checked>
                 <span>Nodes (Points)</span>
@@ -94,19 +129,22 @@
                 <input type="checkbox" name="osmType" value="relation" checked>
                 <span>Relations</span>
             </label>
+            <hr>
             <label class="check-item special">
                 <input type="checkbox" id="all" value="all">
-                <span>All Data</span>
+                <span>All Data (Unfiltered)</span>
             </label>
         </div>
     </div>
     
+    <!-- Format Panel -->
     <div id="format-panel" class="side-panel">
         <div class="panel-header">
             <h3>Export Format</h3>
             <button class="close-panel"><i class="fas fa-times"></i></button>
         </div>
         <div class="panel-content">
+            <div class="section-title">File Format</div>
             <label class="radio-item">
                 <input type="radio" name="format" value="geojson" checked>
                 <span>GeoJSON</span>
@@ -127,9 +165,27 @@
                 <input type="radio" name="format" value="gpx">
                 <span>GPX</span>
             </label>
+            <hr>
+            <div class="section-title">Geometry Types to Export</div>
+            <label class="check-item">
+                <input type="checkbox" name="geometryType" value="Point" checked>
+                <span>Points</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="geometryType" value="LineString" checked>
+                <span>Lines</span>
+            </label>
+            <label class="check-item">
+                <input type="checkbox" name="geometryType" value="Polygon" checked>
+                <span>Polygons</span>
+            </label>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Uncheck geometry types you don't want in the export
+            </p>
         </div>
     </div>
     
+    <!-- Upload Panel -->
     <div id="upload-panel" class="side-panel">
         <div class="panel-header">
             <h3>Upload Boundary</h3>
@@ -138,20 +194,127 @@
         <div class="panel-content">
             <p>Upload a file (GeoJSON, KML, GPX) to define the extraction area.</p>
             <input type="file" id="boundary-upload" accept=".geojson,.kml,.gpx,.json">
+            <div id="upload-status" class="upload-status"></div>
         </div>
     </div>
     
-    <div id="instruction-box" class="instruction-box">
-        <i class="fas fa-info-circle"></i> Click and drag on the map to select an area or upload a boundary file
+    <!-- History Panel -->
+    <div id="history-panel" class="side-panel">
+        <div class="panel-header">
+            <h3>Download History</h3>
+            <button class="close-panel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-content">
+            <div id="history-list" class="history-list"></div>
+        </div>
     </div>
     
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Feature Preview</h3>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="preview-loading" class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i> Fetching preview...
+                </div>
+                <div id="preview-content" style="display: none;">
+                    <div class="preview-stats" id="preview-stats"></div>
+                    <div class="preview-sample" id="preview-sample"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button class="btn btn-primary" id="confirm-download">Download</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Keyboard Shortcuts</h3>
+                <button class="close-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                        <span>Open Search</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>L</kbd>
+                        <span>Open Layers</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>U</kbd>
+                        <span>Upload File</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>D</kbd>
+                        <span>Download Data</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>C</kbd>
+                        <span>Clear Selection</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Esc</kbd>
+                        <span>Close Panels</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <kbd>Ctrl</kbd> + <kbd>Z</kbd>
+                        <span>Undo Drawing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Progress Overlay -->
+    <div id="progress-overlay" class="progress-overlay">
+        <div class="progress-content">
+            <div class="progress-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <div class="progress-text" id="progress-text">Processing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-details" id="progress-details"></div>
+        </div>
+    </div>
+    
+    <!-- Instruction Box -->
+    <div id="instruction-box" class="instruction-box">
+        <i class="fas fa-info-circle"></i> 
+        <span id="instruction-text">Click and drag on the map to select an area or upload a boundary file</span>
+    </div>
+    
+    <!-- Status Messages -->
     <div id="status"></div>
+    
+    <!-- Attribution -->
+    <div class="attribution">
+        Data © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors
+    </div>
     
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tokml@0.4.0/tokml.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/togpx@0.5.5/togpx.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tmcw/togeojson@4.0.0/dist/togeojson.umd.js"></script>
-    <script src="script.js"></script>
+    
+    <script src="utils.js"></script>
+    <script src="fileParser.js"></script>
+    <script src="osmService.js"></script>
+    <script src="geometryProcessor.js"></script>
+    <script src="exportService.js"></script>
+    <script src="uiController.js"></script>
+    <script src="mapController.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
