@@ -178,10 +178,13 @@ class OSMExtractorApp {
 
             // Update loading message
             if (loadingEl) {
-                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting to GeoJSON...';
+                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting to GeoJSON and clipping to boundary...';
             }
 
-            // Convert to GeoJSON
+            // Set clipping boundary BEFORE converting
+            GeometryProcessor.setClipBoundary(bounds);
+
+            // Convert to GeoJSON (will be clipped automatically)
             const geojson = GeometryProcessor.osmToGeoJSON(osmData);
             
             if (!geojson.features || geojson.features.length === 0) {
@@ -273,8 +276,12 @@ class OSMExtractorApp {
                     return;
                 }
 
-                UIController.updateProgress(60, 'Converting to GeoJSON...');
+                UIController.updateProgress(60, 'Converting to GeoJSON and clipping to boundary...');
 
+                // Set clipping boundary BEFORE converting
+                GeometryProcessor.setClipBoundary(bounds);
+
+                // Convert to GeoJSON (will be clipped automatically)
                 geojson = GeometryProcessor.osmToGeoJSON(osmData, (progress) => {
                     UIController.updateProgress(60 + (progress.progress * 0.3), progress.message);
                 });
@@ -288,8 +295,16 @@ class OSMExtractorApp {
             const geomStr = geometryTypes.length === 3 ? '' : '_' + geometryTypes.map(g => g.toLowerCase()).join('_');
             const baseName = Utils.sanitizeFilename(`${location}_${featureStr}${geomStr}`);
 
-            // Export with geometry filter
-            const result = await ExportService.export(format, geojson, osmData, baseName, geometryTypes);
+            // Export with geometry filter and pass bounds + selectedFeatures for metadata
+            const result = await ExportService.export(
+                format, 
+                geojson, 
+                osmData, 
+                baseName, 
+                geometryTypes,
+                bounds,
+                selectedFeatures
+            );
 
             UIController.updateProgress(100, 'Complete!');
 
@@ -326,6 +341,10 @@ class OSMExtractorApp {
         MapController.clearSelection();
         MapController.clearPreviewLayer();
         OSMService.clearCache();
+        
+        // Clear clipping boundary
+        GeometryProcessor.setClipBoundary(null);
+        
         this.currentOSMData = null;
         this.currentGeoJSON = null;
         UIController.showStatus('Selection cleared', 'info');

@@ -134,7 +134,7 @@ const OSMService = {
         if (onProgress) {
             onProgress({ 
                 stage: 'fetch', 
-                message: `Fetching from Overpass API...`,
+                message: `Fetching Data...`,
                 endpoint: endpoint
             });
         }
